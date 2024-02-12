@@ -4,5 +4,6 @@
     {
         public int DetailedProductId { get; set; }
         public string DetailedProductName { get; set; } = null!;
+        public int ProductId { get; set; }
     }
 }

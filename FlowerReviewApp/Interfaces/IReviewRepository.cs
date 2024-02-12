@@ -8,5 +8,7 @@ namespace FlowerReviewApp.Interfaces
         Review GetReview(int reviewId);
         ICollection<Review> GetReviewOfAFlower(int flowerId);
         bool HasReview(int reviewId);
+        bool CreateReview(Review review);
+        bool Save();
     }
 }

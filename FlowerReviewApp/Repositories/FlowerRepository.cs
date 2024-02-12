@@ -1,5 +1,6 @@
 ﻿using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace FlowerReviewApp.Repositories
 {
@@ -37,6 +38,24 @@ namespace FlowerReviewApp.Repositories
         public ICollection<DetailedProduct> GetFlowers()
         {
             return _context.DetailedProducts.OrderBy(p => p.DetailedProductId).ToList();
+        }
+
+        public bool CreateNewFlower(int ownerId, DetailedProduct flower)
+        {
+            var flowerOwnerEntity = _context.Owners.Where(o => o.OwnerId == ownerId).FirstOrDefault();
+            var flowerOwner = new DetailedProductOwner
+            {
+                Owner = flowerOwnerEntity,
+                DetailedProduct = flower
+            };
+            _context.Add(flowerOwner);
+            _context.Add(flower);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

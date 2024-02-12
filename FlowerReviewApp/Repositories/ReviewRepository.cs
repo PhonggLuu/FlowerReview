@@ -30,5 +30,16 @@ namespace FlowerReviewApp.Repositories
         {
             return _context.Reviews.Where(r => r.ReviewId == reviewId).Any();
         }
+
+        public bool CreateReview(Review review)
+        {
+            _context.Add(review);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
+        }
     }
 }

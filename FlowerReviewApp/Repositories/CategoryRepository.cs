@@ -10,6 +10,7 @@ namespace FlowerReviewApp.Repositories
         {
             _context = context;
         }
+
         public ICollection<Category> GetCategories()
         {
             return _context.Categories.ToList();
@@ -33,6 +34,17 @@ namespace FlowerReviewApp.Repositories
         public bool IsCategoryExists(int id)
         {
             return _context.Categories.Any(c => c.CategoryId == id);
+        }
+
+        public bool CreateNewCategory(Category category)
+        {
+            _context.Add(category);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

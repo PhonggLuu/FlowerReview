@@ -1,4 +1,5 @@
-﻿using FlowerReviewApp.Models;
+﻿using FlowerReviewApp.Dto;
+using FlowerReviewApp.Models;
 
 namespace FlowerReviewApp.Interfaces
 {
@@ -9,5 +10,7 @@ namespace FlowerReviewApp.Interfaces
         Product GetProductByName(string name);
         ICollection<DetailedProduct> GetFlowerByProduct(int id);
         bool IsProductExists(int id);
+        bool CreateNewProduct(Product product);
+        bool Save();
     }
 }

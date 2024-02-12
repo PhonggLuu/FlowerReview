@@ -2,6 +2,7 @@
 using FlowerReviewApp.Dto;
 using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using FlowerReviewApp.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerReviewApp.Controllers
@@ -47,6 +48,35 @@ namespace FlowerReviewApp.Controllers
                 return NotFound();
             var flowers = _mapper.Map<List<FlowerDto>>(_productRepository.GetFlowerByProduct(productId));
             return Ok(flowers);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateProduct([FromBody] ProductDto productCreate)
+        {
+            if (productCreate == null)
+                return BadRequest(ModelState);
+            var product = _productRepository.GetProducts()
+                .Where(f => f.ProductName.ToUpper() == productCreate.ProductName.Trim().ToUpper())
+                .FirstOrDefault();
+            if (product != null)
+            {
+                ModelState.AddModelError("", "Product already exists");
+                return StatusCode(422, ModelState);
+            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var productMap = _mapper.Map<Product>(productCreate);
+            productMap.ProductName = productCreate.ProductName.Trim();
+            productMap.CreatedAt = DateTime.UtcNow;
+            productMap.UpdatedAt = DateTime.UtcNow;
+            if (!_productRepository.CreateNewProduct(productMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving!");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created");
         }
     }
 }

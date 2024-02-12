@@ -9,5 +9,7 @@ namespace FlowerReviewApp.Interfaces
         Category GetCategory(string name);
         ICollection<Product> GetProductsByCategory(int categoryId);
         bool IsCategoryExists(int id);
+        bool CreateNewCategory(Category category);
+        bool Save();
     }
 }

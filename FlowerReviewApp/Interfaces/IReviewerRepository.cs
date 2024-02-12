@@ -7,6 +7,8 @@ namespace FlowerReviewApp.Interfaces
         ICollection<Reviewer> GetReviewers();
         Reviewer GetReviewer(int reviewerId);
         ICollection<Review> GetReviewByReviewer(int reviewerId);
-        bool IsReviewerExists(int reviewerId);
+        bool IsReviewerExists(int reviewerId); 
+        bool CreateReviewer(Reviewer reviewer);
+        bool Save();
     }
 }

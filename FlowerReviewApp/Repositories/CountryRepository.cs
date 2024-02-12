@@ -10,6 +10,7 @@ namespace FlowerReviewApp.Repositories
         {
             _context = context;
         }
+
         public ICollection<Country> GetCountries()
         {
             return _context.Countries.ToList();
@@ -27,12 +28,23 @@ namespace FlowerReviewApp.Repositories
 
         public ICollection<Owner> GetOwnersFromCountry(int countryId)
         {
-            return _context.Owners.Where(o => o.CountryID == countryId).ToList();
+            return _context.Owners.Where(o => o.CountryId == countryId).ToList();
         }
 
         public bool HasCountry(int countryId)
         {
             return _context.Countries.Any(c => c.CountryId == countryId);
+        }
+
+        public bool CreateCountry(Country country)
+        {
+            _context.Add(country);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

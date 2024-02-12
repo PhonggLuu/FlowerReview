@@ -1,5 +1,6 @@
 ﻿using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace FlowerReviewApp.Repositories
 {
@@ -33,6 +34,17 @@ namespace FlowerReviewApp.Repositories
         public bool IsOwnerExists(int ownerId)
         {
             return _context.Owners.Any(o => o.OwnerId == ownerId);
+        }
+
+        public bool CreateOwner(Owner owner)
+        {
+            _context.Add(owner);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

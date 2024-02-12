@@ -9,6 +9,7 @@ namespace FlowerReviewApp.Interfaces
         DetailedProduct GetFlower(string name);
         decimal GetRating(int id);
         bool IsFlowerExists(int id);
-
+        bool CreateNewFlower(int ownerId, DetailedProduct flower);
+        bool Save();
     }
 }

@@ -11,6 +11,7 @@ namespace FlowerReviewApp.Repositories
         {
             _context = context;
         }
+
         public ICollection<DetailedProduct> GetFlowerByProduct(int productId)
         {
             return _context.DetailedProducts.Where(dp => dp.ProductId == productId).ToList();
@@ -34,6 +35,17 @@ namespace FlowerReviewApp.Repositories
         public bool IsProductExists(int id)
         {
             return _context.Products.Any(p => p.ProductId == id);
+        }
+
+        public bool CreateNewProduct(Product product)
+        {
+            _context.Add(product);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

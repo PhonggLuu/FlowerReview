@@ -2,6 +2,7 @@
 using FlowerReviewApp.Dto;
 using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using FlowerReviewApp.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerReviewApp.Controllers
@@ -51,6 +52,35 @@ namespace FlowerReviewApp.Controllers
             var products = _mapper.Map<List<ProductDto>>(_categoryRepository.GetProductsByCategory(categoryId));
 
             return Ok(products);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateProduct([FromBody] CategoryDto categoryCreate)
+        {
+            if (categoryCreate == null)
+                return BadRequest(ModelState);
+            var category = _categoryRepository.GetCategories()
+                .Where(c => c.CategoryName.Trim().ToUpper() == categoryCreate.CategoryName.Trim().ToUpper())
+                .FirstOrDefault();
+            if (category != null)
+            {
+                ModelState.AddModelError("", "Category already exists");
+                return StatusCode(422, ModelState);
+            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var categoryMap = _mapper.Map<Category>(categoryCreate);
+            categoryMap.CategoryName = categoryCreate.CategoryName.Trim();
+            categoryMap.CreatedAt = DateTime.UtcNow;
+            categoryMap.UpdatedAt = DateTime.UtcNow;
+            if (!_categoryRepository.CreateNewCategory(categoryMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving!");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created");
         }
     }
 }

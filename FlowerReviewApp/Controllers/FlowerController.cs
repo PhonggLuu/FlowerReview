@@ -51,5 +51,33 @@ namespace FlowerReviewApp.Controllers
 
             return Ok(rating);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateFlower([FromQuery] int ownerId, [FromBody] FlowerDto flowerCreate)
+        {
+            if (flowerCreate == null)
+                return BadRequest(ModelState);
+            var flower = _flowerRepository.GetFlowers()
+                .Where(f => f.DetailedProductName.Trim().ToUpper() == flowerCreate.DetailedProductName.TrimEnd().ToUpper())
+                .FirstOrDefault();
+            if(flower != null)
+            {
+                ModelState.AddModelError("", "Flower already exists");
+                return StatusCode(422, ModelState);
+            }    
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var flowerMap = _mapper.Map<DetailedProduct>(flowerCreate);
+            flowerMap.CreatedAt = DateTime.UtcNow;
+            flowerMap.UpdatedAt = DateTime.UtcNow;
+            if (!_flowerRepository.CreateNewFlower(ownerId, flowerMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving!");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created");
+        }
     }
 }

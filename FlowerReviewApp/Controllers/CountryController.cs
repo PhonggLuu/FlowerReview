@@ -52,5 +52,29 @@ namespace FlowerReviewApp.Controllers
             var country = _mapper.Map<List<OwnerDto>>(_countryRepository.GetOwnersFromCountry(countryId));
             return Ok(country);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateNewCountry([FromBody] CountryDto countryCreate)
+        {
+            if (countryCreate == null)
+                return BadRequest(ModelState);
+            var isExisted = _countryRepository.GetCountries().Any(c => c.Name.ToUpper() == countryCreate.Name.Trim().ToUpper());
+            if(isExisted)
+            {
+                ModelState.AddModelError("", "Country already exists");
+                return StatusCode(422, ModelState);
+            }    
+            var country = _mapper.Map<Country>(countryCreate);
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if(!_countryRepository.CreateCountry(country))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created");
+        }
     }
 }
