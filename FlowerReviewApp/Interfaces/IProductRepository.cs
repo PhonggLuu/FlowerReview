@@ -10,7 +10,10 @@ namespace FlowerReviewApp.Interfaces
         Product GetProductByName(string name);
         ICollection<DetailedProduct> GetFlowerByProduct(int id);
         bool IsProductExists(int id);
+        bool IsReference(int productId);
         bool CreateNewProduct(Product product);
+        bool UpdateProduct(Product product);
+        bool DeleteProduct(Product product);
         bool Save();
     }
 }

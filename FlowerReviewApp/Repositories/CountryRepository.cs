@@ -28,7 +28,7 @@ namespace FlowerReviewApp.Repositories
 
         public ICollection<Owner> GetOwnersFromCountry(int countryId)
         {
-            return _context.Owners.Where(o => o.CountryId == countryId).ToList();
+            return _context.Owners.Where(o => o.Country.CountryId == countryId).ToList();
         }
 
         public bool HasCountry(int countryId)
@@ -36,9 +36,26 @@ namespace FlowerReviewApp.Repositories
             return _context.Countries.Any(c => c.CountryId == countryId);
         }
 
+        public bool IsReference(int countryId)
+        {
+            return _context.Owners.Any(o => o.Country.CountryId == countryId);
+        }
+
         public bool CreateCountry(Country country)
         {
             _context.Add(country);
+            return Save();
+        }
+
+        public bool UpdateCountry(Country country)
+        {
+            _context.Update(country);
+            return Save();
+        }
+
+        public bool DeleteCountry(Country country)
+        {
+            _context.Remove(country);
             return Save();
         }
 

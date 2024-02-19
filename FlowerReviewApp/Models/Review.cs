@@ -9,8 +9,6 @@ namespace FlowerReviewApp.Models
         public string Title { get; set; } = null!;
         public string Text { get; set; } = null!;
         public int Rating { get; set; }
-        public int DetailedProductId { get; set; }
-        public int ReviewerId { get; set; }
         public virtual DetailedProduct DetailedProduct { get; set; } = null!;
         public virtual Reviewer Reviewer { get; set; } = null!;
     }

@@ -21,13 +21,13 @@ namespace FlowerReviewApp.Helper
             CreateMap<CountryDto, Country>();
 
             CreateMap<Owner, OwnerDto>();
-            CreateMap<OwnerDto, Owner>();
+            CreateMap<OwnerDto, Owner>().ReverseMap(); ;
 
             CreateMap<Review, ReviewDto>();
-            CreateMap<ReviewDto, Review>();
+            CreateMap<ReviewDto, Review>().ReverseMap(); ;
 
             CreateMap<Reviewer, ReviewerDto>();
-            CreateMap<ReviewerDto, Reviewer>();
+            CreateMap<ReviewerDto, Reviewer>().ReverseMap(); ;
         }
     }
 }

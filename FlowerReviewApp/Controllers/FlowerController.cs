@@ -2,6 +2,7 @@
 using FlowerReviewApp.Dto;
 using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using FlowerReviewApp.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerReviewApp.Controllers
@@ -11,10 +12,12 @@ namespace FlowerReviewApp.Controllers
     public class FlowerController : ControllerBase
     {
         private readonly IFlowerRepository _flowerRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
-        public FlowerController(IFlowerRepository flowerRepository, IMapper mapper)
+        public FlowerController(IFlowerRepository flowerRepository, IReviewRepository reviewRepository, IMapper mapper)
         {
             _flowerRepository = flowerRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -78,6 +81,68 @@ namespace FlowerReviewApp.Controllers
                 return StatusCode(500, ModelState);
             }
             return Ok("Successfully created");
+        }
+
+        [HttpPut("{flowerId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateFlower(int flowerId, [FromBody] FlowerDto updatedProduct)
+        {
+            if (updatedProduct == null)
+                return BadRequest(ModelState);
+
+            if (flowerId != updatedProduct.DetailedProductId)
+                return BadRequest(ModelState);
+
+            if (!_flowerRepository.IsFlowerExists(flowerId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var productMap = _mapper.Map<DetailedProduct>(updatedProduct);
+            productMap.UpdatedAt = DateTime.UtcNow;
+
+            if (!_flowerRepository.UpdateFlower(productMap))
+            {
+                ModelState.AddModelError("", "Something went wrong updating flower");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(new
+            {
+                Success = true, Data = productMap
+            });
+        }
+
+        [HttpDelete("{flowerId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteFlower(int flowerId)
+        {
+            if (!_flowerRepository.IsFlowerExists(flowerId))
+            {
+                return NotFound();
+            }
+
+            var productToDelete = _flowerRepository.GetFlower(flowerId);
+            var reviewsToDelete = _reviewRepository.GetReviewOfAFlower(flowerId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_reviewRepository.DeleteReviews(reviewsToDelete.ToList()))
+            {
+                ModelState.AddModelError("", "Something went wrong when deleting reviews");
+            }
+            if (!_flowerRepository.DeleteFlower(productToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong deleting flower");
+            }
+
+            return NoContent();
         }
     }
 }

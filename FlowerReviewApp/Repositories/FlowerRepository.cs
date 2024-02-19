@@ -53,6 +53,23 @@ namespace FlowerReviewApp.Repositories
             return Save();
         }
 
+        public bool UpdateFlower(DetailedProduct flower)
+        {
+            _context.Update(flower);
+            return Save();
+        }
+
+        public bool DeleteFlower(DetailedProduct flower)
+        {
+            var flowerOwner = _context.DetailedProductOwners.Where(f => f.DetailedProductId == flower.DetailedProductId).FirstOrDefault();
+            if (flowerOwner != null)
+            {
+                _context.Remove(flowerOwner);
+            }
+            _context.Remove(flower);
+            return Save();
+        }
+
         public bool Save()
         {
             return _context.SaveChanges() > 0 ? true : false;

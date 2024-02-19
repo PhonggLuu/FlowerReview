@@ -28,12 +28,17 @@ namespace FlowerReviewApp.Repositories
 
         public ICollection<Product> GetProductsByCategory(int categoryId)
         {
-            return _context.Products.Where(p => p.CategoryID == categoryId).ToList();
+            return _context.Products.Where(p => p.Category.CategoryId == categoryId).ToList();
         }
 
         public bool IsCategoryExists(int id)
         {
             return _context.Categories.Any(c => c.CategoryId == id);
+        }
+
+        public bool IsReference(int id)
+        {
+            return _context.Products.Any(p => p.Category.CategoryId == id);
         }
 
         public bool CreateNewCategory(Category category)
@@ -45,6 +50,18 @@ namespace FlowerReviewApp.Repositories
         public bool Save()
         {
             return _context.SaveChanges() > 0 ? true : false;
+        }
+
+        public bool UpdateCategory(Category category)
+        {
+            _context.Update(category);
+            return Save();
+        }
+
+        public bool DeleteCategory(Category category)
+        {
+            _context.Remove(category);
+            return Save();
         }
     }
 }

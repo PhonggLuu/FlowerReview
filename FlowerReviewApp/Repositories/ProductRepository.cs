@@ -14,7 +14,7 @@ namespace FlowerReviewApp.Repositories
 
         public ICollection<DetailedProduct> GetFlowerByProduct(int productId)
         {
-            return _context.DetailedProducts.Where(dp => dp.ProductId == productId).ToList();
+            return _context.DetailedProducts.Where(dp => dp.Product.ProductId == productId).ToList();
         }
 
         public Product GetProductById(int productId)
@@ -37,9 +37,25 @@ namespace FlowerReviewApp.Repositories
             return _context.Products.Any(p => p.ProductId == id);
         }
 
+        public bool IsReference(int id)
+        {
+            return _context.DetailedProducts.Any(p => p.Product.ProductId == id);
+        }
+
         public bool CreateNewProduct(Product product)
         {
             _context.Add(product);
+            return Save();
+        }
+
+        public bool UpdateProduct(Product product)
+        {
+            _context.Update(product);
+            return Save();
+        }
+        public bool DeleteProduct(Product product)
+        {
+            _context.Remove(product);
             return Save();
         }
 

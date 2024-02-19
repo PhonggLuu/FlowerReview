@@ -15,7 +15,6 @@ namespace FlowerReviewApp.Models
         public string? Image { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public int ProductId { get; set; }
         public virtual Product Product { get; set; } = null!;
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<DetailedProductOwner> DetailedProductOwners { get; set; }

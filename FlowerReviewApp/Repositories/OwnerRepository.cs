@@ -36,9 +36,32 @@ namespace FlowerReviewApp.Repositories
             return _context.Owners.Any(o => o.OwnerId == ownerId);
         }
 
+
+        public bool IsReference(int ownerId)
+        {
+            return _context.DetailedProductOwners.Any(o => o.OwnerId == ownerId);
+        }
+
         public bool CreateOwner(Owner owner)
         {
             _context.Add(owner);
+            return Save();
+        }
+
+        public bool UpdateOwner(Owner owner)
+        {
+            _context.Update(owner);
+            return Save();
+        }
+
+        public bool DeleteOwner(Owner owner)
+        {
+            var flowerOwner = _context.DetailedProductOwners.Where(o => o.OwnerId == owner.OwnerId).FirstOrDefault();
+            if (flowerOwner != null)
+            {
+                _context.Remove(flowerOwner);
+            }
+            _context.Remove(owner);
             return Save();
         }
 

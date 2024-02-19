@@ -78,5 +78,64 @@ namespace FlowerReviewApp.Controllers
             }
             return Ok("Successfully created");
         }
+
+        [HttpPut("{productId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateProduct(int productId, [FromBody] ProductDto updatedProduct)
+        {
+            if (updatedProduct == null)
+                return BadRequest(ModelState);
+
+            if (productId != updatedProduct.ProductId)
+                return BadRequest(ModelState);
+
+            if (!_productRepository.IsProductExists(productId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var productMap = _mapper.Map<Product>(updatedProduct);
+
+            if (!_productRepository.UpdateProduct(productMap))
+            {
+                ModelState.AddModelError("", "Something went wrong updating product");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{productId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteProduct(int productId)
+        {
+            if (!_productRepository.IsProductExists(productId))
+            {
+                return NotFound();
+            }
+
+            if (_productRepository.IsReference(productId))
+            {
+                ModelState.AddModelError("", "Product is referenced. Cannot delete");
+                return BadRequest(ModelState);
+            }
+
+            var productToDelete = _productRepository.GetProductById(productId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_productRepository.DeleteProduct(productToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong deleting product");
+            }
+
+            return NoContent();
+        }
     }
 }
