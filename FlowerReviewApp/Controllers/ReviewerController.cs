@@ -56,33 +56,107 @@ namespace FlowerReviewApp.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate)
+        public async Task<JsonResult> CreateReviewer([FromBody] ReviewerDto reviewerCreate)
         {
             if (reviewerCreate == null)
-                return BadRequest(ModelState);
+            {
+                var errorResponse = new { message = "ReviewerCreate object is null." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }    
 
-            var country = _reviewerRepository.GetReviewers()
+            var reviewers = await _reviewerRepository.GetReviewers();
+            var reviewer = reviewers
                 .Where(c => c.LastName.Trim().ToUpper() == reviewerCreate.LastName.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
-            if (country != null)
+            if (reviewer != null)
             {
-                ModelState.AddModelError("", "Reviewer already exists");
-                return StatusCode(422, ModelState);
+                var errorResponse = new { message = "Reviewer already exists." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status422UnprocessableEntity };
             }
 
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Any())
+                    .ToDictionary(x => x.Key, x => x.Value.Errors.Select(e => e.ErrorMessage).ToList());
+
+                var errorResponse = new { message = "Model validation failed.", errors = errors };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
 
             var reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
 
             if (!_reviewerRepository.CreateReviewer(reviewerMap))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
+                var errorResponse = new { message = "Something went wrong while saving!" };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status500InternalServerError };
             }
 
-            return Ok("Successfully created");
+            return new JsonResult(reviewerMap);
+        }
+
+        [HttpPut("{reviewerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<JsonResult> RemoveProductInCart(int reviewerId, [FromBody] ReviewerDto reviewerUpdate)
+        {
+            if (reviewerUpdate == null)
+            {
+                var errorResponse = new { message = "Reviewer does not have infor" };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            if(reviewerId != reviewerUpdate.ReviewerId)
+            {
+                var errorResponse = new { message = "Id is not matching." };
+                return new JsonResult(errorResponse) { StatusCode= StatusCodes.Status400BadRequest };
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorResponse = new { message = "Model validation failed." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            var reviewer = _mapper.Map<Reviewer> (reviewerUpdate);
+            if (!_reviewerRepository.UpdateReviewer(reviewer))
+            {
+                var errorResponse = new { message = "Something went wrong while saving!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            var result = new JsonResult(new
+            {
+                message = "Update successfully!",
+                data = reviewer // yourData là đối tượng mà bạn muốn trả về dưới dạng JSON
+            });
+            result.StatusCode = StatusCodes.Status200OK;
+            return result;
+        }
+
+        [HttpDelete("{reviewerId}")]
+        public async Task<JsonResult> DeleteReviewer(int reviewerId)
+        {
+            Reviewer reviewer = _reviewerRepository.GetReviewer(reviewerId);
+            if (reviewer == null)
+            {
+                var errorResponse = new { message = "Reviewer does not have infor!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            if (!_reviewerRepository.DeleteReviewer(reviewer))
+            {
+                var errorResponse = new { message = "Something went wrong while saving!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            var result = new JsonResult(new
+            {
+                message = "Deleted successfully!",
+            });
+            result.StatusCode = StatusCodes.Status200OK;
+            return result;
         }
     }
 }

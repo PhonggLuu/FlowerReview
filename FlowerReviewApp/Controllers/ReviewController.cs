@@ -84,11 +84,74 @@ namespace FlowerReviewApp.Controllers
 
             if (!_reviewRepository.CreateReview(reviewMap))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
+                ModelState.AddModelError("", "Something went wrong while saving!");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Successfully created");
+        }
+
+        [HttpPut("{reviewId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<JsonResult> RemoveProductInCart(int reviewId, [FromBody] ReviewDto reviewUpdate)
+        {
+            if (reviewUpdate == null)
+            {
+                var errorResponse = new { message = "Review does not have infor" };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            if (reviewId != reviewUpdate.ReviewId)
+            {
+                var errorResponse = new { message = "Id is not matching." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorResponse = new { message = "Model validation failed." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            var review = _mapper.Map<Review>(reviewUpdate);
+            if (!_reviewRepository.UpdateReview(review))
+            {
+                var errorResponse = new { message = "Something went wrong while saving!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            var result = new JsonResult(new
+            {
+                message = "Update successfully!",
+                data = review // yourData là đối tượng mà bạn muốn trả về dưới dạng JSON
+            });
+            result.StatusCode = StatusCodes.Status200OK;
+            return result;
+        }
+
+        [HttpDelete("{reviewId}")]
+        public async Task<JsonResult> DeleteReview(int reviewId)
+        {
+            Review review = _reviewRepository.GetReview(reviewId);
+            if (review == null)
+            {
+                var errorResponse = new { message = "Reviewer does not have infor!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            if (!_reviewRepository.DeleteReview(review))
+            {
+                var errorResponse = new { message = "Something went wrong while saving!." };
+                return new JsonResult(errorResponse) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            var result = new JsonResult(new
+            {
+                message = "Deleted successfully!",
+            });
+            result.StatusCode = StatusCodes.Status200OK;
+            return result;
         }
     }
 }

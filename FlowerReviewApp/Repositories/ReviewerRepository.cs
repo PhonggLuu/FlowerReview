@@ -1,5 +1,6 @@
 ﻿using FlowerReviewApp.Interfaces;
 using FlowerReviewApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowerReviewApp.Repositories
 {
@@ -21,9 +22,9 @@ namespace FlowerReviewApp.Repositories
             return _context.Reviewers.FirstOrDefault(r => r.ReviewerId == reviewerId);
         }
 
-        public ICollection<Reviewer> GetReviewers()
+        public async Task< ICollection<Reviewer>> GetReviewers()
         {
-            return _context.Reviewers.ToList();
+            return await _context.Reviewers.ToListAsync();
         }
 
         public bool IsReviewerExists(int reviewerId)
@@ -45,6 +46,9 @@ namespace FlowerReviewApp.Repositories
 
         public bool DeleteReviewer(Reviewer reviewer)
         {
+
+            var reviews = _context.Reviews.Where(r => r.Reviewer.ReviewerId == reviewer.ReviewerId);
+            _context.Reviews.RemoveRange(reviews);
             _context.Remove(reviewer);
             return Save();
         }
